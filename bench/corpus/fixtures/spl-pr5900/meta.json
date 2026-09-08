@@ -1,0 +1,17 @@
+{
+  "id": "spl-pr5900",
+  "rule": "ix-signer-flag",
+  "repo": "solana-labs/solana-program-library",
+  "sha": "96b37d41c622085615fddc0219450572afe7db0e",
+  "file": "token/program-2022/src/extension/confidential_transfer_fee/instruction.rs",
+  "expectTier": 1,
+  "note": "AccountMeta::new(**multisig_signer, false)",
+  "buggyChanged": [
+    322,
+    414
+  ],
+  "fixedChanged": [
+    322,
+    414
+  ]
+}

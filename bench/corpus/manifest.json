@@ -1,0 +1,221 @@
+{
+  "_comment": "Ground-truth corpus. Each entry: a real fix commit. The detector MUST fire on the pre-fix (buggy) file within the patched region and MUST be silent on the post-fix (fixed) file. Full SHAs are read from each patch's `From` line by scripts/build-fixtures. Patch paths are relative to the tool/ dir; `../research/patches` is the curated set shipped with the brief, `bench/corpus/vendor-patches` are additional evidence patches this build fetched.",
+  "entries": [
+    {
+      "id": "jito-32d72f136c",
+      "rule": "discarded-checked-result",
+      "repo": "jito-foundation/jito-programs",
+      "patch": "bench/corpus/vendor-patches/jito-32d72f136c.patch",
+      "file": "tip-payment/programs/tip-distribution/src/lib.rs",
+      "expectTier": 1,
+      "note": "bare `.checked_add(amount).unwrap();` statement discards the result"
+    },
+    {
+      "id": "wormhole-972939ee31",
+      "rule": "discarded-checked-result",
+      "repo": "wormhole-foundation/wormhole",
+      "patch": "../research/patches/wormhole-972939ee31.patch",
+      "file": "solana/pyth2wormhole/program/src/attest.rs",
+      "expectTier": 1,
+      "note": "if-mismatch block logs but never returns Err"
+    },
+    {
+      "id": "gmsol-bf2a35c6d7",
+      "rule": "copy-paste-constraint",
+      "repo": "gmsol-labs/gmx-solana",
+      "patch": "../research/patches/gmsol-bf2a35c6d7.patch",
+      "file": "programs/store/src/instructions/exchange/shift.rs",
+      "expectTier": 1,
+      "note": "to_market_token constraint copy-pasted from from_market_token"
+    },
+    {
+      "id": "tensor-713db3affe",
+      "rule": "disabled-constraint",
+      "repo": "tensor-foundation/marketplace",
+      "patch": "../research/patches/tensor-713db3affe.patch",
+      "file": "program/src/instructions/legacy/buy.rs",
+      "expectTier": 1,
+      "note": "/// CHECK: none, can be anything + commented-out address= constraint"
+    },
+    {
+      "id": "gmsol-a12c0df6da",
+      "rule": "disabled-constraint",
+      "repo": "gmsol-labs/gmx-solana",
+      "patch": "../research/patches/gmsol-a12c0df6da.patch",
+      "file": "programs/store/src/instructions/exchange/execute_order.rs",
+      "expectTier": 1,
+      "note": "final_output_market unpacked from remaining_accounts"
+    },
+    {
+      "id": "marginfi-28222ee531",
+      "rule": "zero-share-conversion",
+      "repo": "mrgnlabs/marginfi-v2",
+      "patch": "bench/corpus/vendor-patches/marginfi-28222ee531.patch",
+      "file": "programs/marginfi/src/state/marginfi_account.rs",
+      "expectTier": 1,
+      "note": "get_asset_shares used to withdraw without a shares>0 check"
+    },
+    {
+      "id": "gmsol-a2779d14f1",
+      "rule": "realloc-zero-init",
+      "repo": "gmsol-labs/gmx-solana",
+      "patch": "../research/patches/gmsol-a2779d14f1.patch",
+      "file": "programs/store/src/instructions/token_config.rs",
+      "expectTier": 1,
+      "note": "realloc(new_space, false); this is the README demo (#362)"
+    },
+    {
+      "id": "wormhole-2b56fcc7da",
+      "rule": "prefunded-pda-dos",
+      "repo": "wormhole-foundation/wormhole",
+      "patch": "../research/patches/wormhole-2b56fcc7da.patch",
+      "file": "solana/bridge/program/src/api/post_message.rs",
+      "expectTier": 1,
+      "note": "raw system_instruction::create_account + invoke, no exists-guard"
+    },
+    {
+      "id": "mplcore-1a68114713",
+      "rule": "auth-precedence",
+      "repo": "metaplex-foundation/mpl-core",
+      "patch": "../research/patches/mplcore-1a68114713.patch",
+      "file": "programs/mpl-core/src/plugins/internal/authority_managed/update_delegate.rs",
+      "expectTier": 1,
+      "note": "A || B && C auth condition without parentheses"
+    },
+    {
+      "id": "marinade-c6cdf23ad1",
+      "rule": "early-return-skips-cleanup",
+      "repo": "marinade-finance/liquid-staking-program",
+      "patch": "../research/patches/marinade-c6cdf23ad1.patch",
+      "file": "programs/marinade-finance/src/instructions/crank/deactivate_stake.rs",
+      "expectTier": 2,
+      "note": "early return Ok(()) skips return_unused_split_stake_account_rent"
+    },
+    {
+      "id": "sanctum-2c396c275c",
+      "rule": "missing-bounds-gate",
+      "repo": "igneous-labs/S",
+      "patch": "bench/corpus/vendor-patches/sanctum-2c396c275c.patch",
+      "file": "programs/pricing-programs/flat-fee/src/processor/set_lp_withdrawal_fee.rs",
+      "expectTier": 2,
+      "note": "lp_withdrawal_fee_bps set without an upper bound"
+    },
+    {
+      "id": "mpltm-9485552af1",
+      "rule": "wrong-object-auth-check",
+      "repo": "metaplex-foundation/mpl-token-metadata",
+      "patch": "../research/patches/mpltm-9485552af1.patch",
+      "file": "programs/token-metadata/program/src/processor/delegate/delegate.rs",
+      "expectTier": 2,
+      "note": "token.owner == authority without tying the token account to the mint"
+    },
+    {
+      "id": "gmsol-93044f7442",
+      "rule": "fixed-buffer-arithmetic",
+      "repo": "gmsol-labs/gmx-solana",
+      "patch": "bench/corpus/vendor-patches/gmsol-93044f7442.patch",
+      "file": "crates/utils/src/fixed_map.rs",
+      "expectTier": 2,
+      "note": "data[i + 1] inside for i in index..len"
+    },
+    {
+      "id": "sanctum-a8623b718a",
+      "rule": "fixed-buffer-arithmetic",
+      "repo": "igneous-labs/S",
+      "patch": "../research/patches/sanctum-a8623b718a.patch",
+      "file": "programs/s-controller/src/list_account.rs",
+      "expectTier": 2,
+      "note": "ptr::copy(src.add(..), base_ptr, ..) memmove to base"
+    },
+    {
+      "id": "jito-1455366f44",
+      "rule": "unchecked-arithmetic",
+      "repo": "jito-foundation/jito-programs",
+      "patch": "bench/corpus/vendor-patches/jito-1455366f44.patch",
+      "file": "mev-payment/programs/mev-payment/src/lib.rs",
+      "expectTier": 3,
+      "note": "raw lamport += / -= without checked_"
+    },
+    {
+      "id": "jito-restaking-pr194",
+      "rule": "incomplete-account-close",
+      "repo": "jito-foundation/restaking",
+      "patch": "../research/patches/jito-restaking-pr194.patch",
+      "file": "core/src/lib.rs",
+      "expectTier": 1,
+      "note": "manual close (assign+memset) without realloc(0)"
+    },
+    {
+      "id": "sanctum-pr192",
+      "rule": "one-sided-bound-signed",
+      "repo": "igneous-labs/S",
+      "patch": "../research/patches/sanctum-pr192.patch",
+      "file": "libs/pricing-programs/flat-fee-lib/src/fee_bound.rs",
+      "expectTier": 1,
+      "note": "if MAX_FEE_BPS < fee_bps_i16 (one-sided signed bound)"
+    },
+    {
+      "id": "marginfi-2d6de777ef",
+      "rule": "lossy-as-cast",
+      "repo": "mrgnlabs/marginfi-v2",
+      "patch": "../research/patches/marginfi-2d6de777ef.patch",
+      "file": "programs/marginfi/src/state/rate_limiter.rs",
+      "expectTier": 1,
+      "note": "amount as i64 (u64->i64 wrap) in rate limiter"
+    },
+    {
+      "id": "spl-pr5900",
+      "rule": "ix-signer-flag",
+      "repo": "solana-labs/solana-program-library",
+      "patch": "bench/corpus/vendor-patches/spl-pr5900-c1.patch",
+      "file": "token/program-2022/src/extension/confidential_transfer_fee/instruction.rs",
+      "expectTier": 1,
+      "note": "AccountMeta::new(**multisig_signer, false)"
+    },
+    {
+      "id": "drift-b7fff7875",
+      "rule": "subtype-blind-solvency",
+      "repo": "velocity-exchange/protocol-v2",
+      "patch": "bench/corpus/fixtures/drift-b7fff7875 (fixtures extracted from _mining worktree; no vendor patch)",
+      "file": "programs/drift/src/math/bankruptcy.rs",
+      "expectTier": 2,
+      "note": "is_cross_margin_bankrupt perp loop never skips isolated positions (PR #1757; fixed by #2123)"
+    },
+    {
+      "id": "drift-e6ee7b4e1",
+      "rule": "early-return-skips-cleanup",
+      "repo": "velocity-exchange/protocol-v2",
+      "patch": "bench/corpus/fixtures/drift-e6ee7b4e1 (fixtures extracted from _mining worktree; no vendor patch)",
+      "file": "programs/drift/src/state/liquidation_mode.rs",
+      "expectTier": 2,
+      "note": "get_perp_position()? aborts mode dispatch before the exit_liquidation path (PR #1757; fixed by #2122)"
+    },
+    {
+      "id": "jito-5be43ef2c7",
+      "rule": "closed-enum-deserialize",
+      "repo": "jito-foundation/jito-programs",
+      "patch": "bench/corpus/fixtures/jito-5be43ef2c7 (fixtures extracted from _mining worktree; no vendor patch)",
+      "file": "mev-programs/programs/vote-state/src/lib.rs",
+      "expectTier": 2,
+      "note": "full bincode deserialize of vote account into closed VoteStateVersions enum (PR #136; fixed by #153)"
+    },
+    {
+      "id": "klend-95d694b",
+      "rule": "unused-state-gate",
+      "repo": "Kamino-Finance/klend",
+      "patch": "bench/corpus/fixtures/klend-95d694b (fixtures extracted from _mining worktree; after.rs is the would-be fix — bug live at HEAD)",
+      "file": "programs/klend/src/state/obligation.rs",
+      "expectTier": 3,
+      "note": "check_ownership_transfer_not_in_progress added but never invoked by position-mutating methods (PR #60)"
+    },
+    {
+      "id": "gmsol-pr439",
+      "rule": "checked-sub-ordering",
+      "repo": "gmsol-labs/gmx-solana",
+      "patch": "bench/corpus/fixtures/gmsol-pr439 (fixtures extracted from _mining/wt-pr439 worktree; after.rs is a synthesized reorder fix)",
+      "file": "crates/sdk/src/position/mod.rs",
+      "expectTier": 3,
+      "note": "residual.checked_add(funding)?.checked_sub(collateral_value)? always <= 0 -> None in production (PR #439)"
+    }
+  ]
+}

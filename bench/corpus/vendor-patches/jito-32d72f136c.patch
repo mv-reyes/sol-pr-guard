@@ -1,0 +1,29 @@
+From 32d72f136cf561ce4c910e48721ebdb551aed645 Mon Sep 17 00:00:00 2001
+From: segfaultdoctor <zano@jito.wtf>
+Date: Mon, 24 Oct 2022 13:07:40 -0400
+Subject: [PATCH] fix claim bug (#56)
+
+---
+ tip-payment/programs/tip-distribution/src/lib.rs | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/tip-payment/programs/tip-distribution/src/lib.rs b/tip-payment/programs/tip-distribution/src/lib.rs
+index daa47347..1ff1ea19 100644
+--- a/tip-payment/programs/tip-distribution/src/lib.rs
++++ b/tip-payment/programs/tip-distribution/src/lib.rs
+@@ -261,11 +261,13 @@ pub mod tip_distribution {
+         claim_status.slot_claimed_at = clock.slot;
+         claim_status.claimant = claimant_account.key();
+ 
+-        merkle_root.total_funds_claimed.checked_add(amount).unwrap();
++        merkle_root.total_funds_claimed =
++            merkle_root.total_funds_claimed.checked_add(amount).unwrap();
+         if merkle_root.total_funds_claimed > merkle_root.max_total_claim {
+             return Err(ExceedsMaxClaim.into());
+         }
+-        merkle_root.num_nodes_claimed.checked_add(1).unwrap();
++
++        merkle_root.num_nodes_claimed = merkle_root.num_nodes_claimed.checked_add(1).unwrap();
+         if merkle_root.num_nodes_claimed > merkle_root.max_num_nodes {
+             return Err(ExceedsMaxNumNodes.into());
+         }

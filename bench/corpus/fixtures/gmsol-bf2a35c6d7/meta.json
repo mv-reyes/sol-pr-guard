@@ -1,0 +1,15 @@
+{
+  "id": "gmsol-bf2a35c6d7",
+  "rule": "copy-paste-constraint",
+  "repo": "gmsol-labs/gmx-solana",
+  "sha": "bf2a35c6d79de2b01f6088f16313786dd66744cc",
+  "file": "programs/store/src/instructions/exchange/shift.rs",
+  "expectTier": 1,
+  "note": "to_market_token constraint copy-pasted from from_market_token",
+  "buggyChanged": [
+    54
+  ],
+  "fixedChanged": [
+    54
+  ]
+}

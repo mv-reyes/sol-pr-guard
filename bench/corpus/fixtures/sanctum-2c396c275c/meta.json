@@ -1,0 +1,36 @@
+{
+  "id": "sanctum-2c396c275c",
+  "rule": "missing-bounds-gate",
+  "repo": "igneous-labs/S",
+  "sha": "91a7229c78e03bcdc95cd587acbf7f79c5608d4b",
+  "file": "programs/pricing-programs/flat-fee/src/processor/set_lp_withdrawal_fee.rs",
+  "expectTier": 2,
+  "note": "lp_withdrawal_fee_bps set without an upper bound",
+  "buggyChanged": [
+    5,
+    15,
+    16,
+    17,
+    19,
+    23,
+    40,
+    41,
+    42,
+    43,
+    44
+  ],
+  "fixedChanged": [
+    5,
+    6,
+    7,
+    8,
+    18,
+    20,
+    24,
+    31,
+    32,
+    33,
+    47,
+    48
+  ]
+}

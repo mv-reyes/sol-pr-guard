@@ -1,0 +1,34 @@
+{
+  "id": "mpltm-9485552af1",
+  "rule": "wrong-object-auth-check",
+  "repo": "metaplex-foundation/mpl-token-metadata",
+  "sha": "9485552af1d9f90e977df644ce66cef253d8f6eb",
+  "file": "programs/token-metadata/program/src/processor/delegate/delegate.rs",
+  "expectTier": 2,
+  "note": "token.owner == authority without tying the token account to the mint",
+  "buggyChanged": [
+    14,
+    226,
+    227,
+    228,
+    229,
+    230,
+    231,
+    232,
+    233,
+    234
+  ],
+  "fixedChanged": [
+    14,
+    226,
+    227,
+    228,
+    229,
+    230,
+    231,
+    232,
+    233,
+    234,
+    235
+  ]
+}

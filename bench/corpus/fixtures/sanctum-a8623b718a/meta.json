@@ -1,0 +1,32 @@
+{
+  "id": "sanctum-a8623b718a",
+  "rule": "fixed-buffer-arithmetic",
+  "repo": "igneous-labs/S",
+  "sha": "a8623b718a6d7eadffc235e44406711ce2047492",
+  "file": "programs/s-controller/src/list_account.rs",
+  "expectTier": 2,
+  "note": "ptr::copy(src.add(..), base_ptr, ..) memmove to base",
+  "buggyChanged": [
+    64,
+    65,
+    66,
+    73,
+    74,
+    75,
+    76,
+    77,
+    78,
+    79
+  ],
+  "fixedChanged": [
+    64,
+    65,
+    66,
+    67,
+    68,
+    74,
+    76,
+    77,
+    78
+  ]
+}

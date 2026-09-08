@@ -1,0 +1,31 @@
+From 96b37d41c622085615fddc0219450572afe7db0e Mon Sep 17 00:00:00 2001
+From: Jon C <me@jonc.dev>
+Date: Mon, 27 Nov 2023 22:07:20 +0100
+Subject: [PATCH 1/2] token-2022: [OS-SPL-ADV-02] Fix instruction creator
+
+---
+ .../src/extension/confidential_transfer_fee/instruction.rs    | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/token/program-2022/src/extension/confidential_transfer_fee/instruction.rs b/token/program-2022/src/extension/confidential_transfer_fee/instruction.rs
+index ba5df33d890..839afeacf16 100644
+--- a/token/program-2022/src/extension/confidential_transfer_fee/instruction.rs
++++ b/token/program-2022/src/extension/confidential_transfer_fee/instruction.rs
+@@ -319,7 +319,7 @@ pub fn inner_withdraw_withheld_tokens_from_mint(
+     ));
+ 
+     for multisig_signer in multisig_signers.iter() {
+-        accounts.push(AccountMeta::new(**multisig_signer, false));
++        accounts.push(AccountMeta::new(**multisig_signer, true));
+     }
+ 
+     Ok(encode_instruction(
+@@ -411,7 +411,7 @@ pub fn inner_withdraw_withheld_tokens_from_accounts(
+     ));
+ 
+     for multisig_signer in multisig_signers.iter() {
+-        accounts.push(AccountMeta::new(**multisig_signer, false));
++        accounts.push(AccountMeta::new(**multisig_signer, true));
+     }
+ 
+     for source in sources.iter() {

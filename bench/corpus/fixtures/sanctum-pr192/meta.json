@@ -1,0 +1,15 @@
+{
+  "id": "sanctum-pr192",
+  "rule": "one-sided-bound-signed",
+  "repo": "igneous-labs/S",
+  "sha": "e081f6e8b1859e7d0195aa3a808ca8559d3d1b40",
+  "file": "libs/pricing-programs/flat-fee-lib/src/fee_bound.rs",
+  "expectTier": 1,
+  "note": "if MAX_FEE_BPS < fee_bps_i16 (one-sided signed bound)",
+  "buggyChanged": [
+    6
+  ],
+  "fixedChanged": [
+    6
+  ]
+}

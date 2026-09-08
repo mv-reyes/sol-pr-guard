@@ -1,0 +1,50 @@
+name: 'sol-pr-guard'
+description: 'Diff-scoped security review for Solana (Rust/Anchor) pull requests: precise file:line findings from real exploits.'
+branding:
+  icon: 'shield'
+  color: 'purple'
+inputs:
+  args:
+    description: 'Extra CLI args passed to `sol-pr-guard scan`.'
+    required: false
+    default: ''
+  fail-on:
+    description: 'Gate tier: T1 | T2 | T3 | none (default T2).'
+    required: false
+    default: 'T2'
+  token:
+    description: 'GitHub token (defaults to the workflow token).'
+    required: false
+    default: ${{ github.token }}
+  version:
+    description: 'npm version/tag of sol-pr-guard to run.'
+    required: false
+    default: 'latest'
+runs:
+  using: 'composite'
+  steps:
+    - name: Run sol-pr-guard and produce SARIF
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.token }}
+      run: |
+        set -euo pipefail
+        npx --yes sol-pr-guard@${{ inputs.version }} scan \
+          --repo "${{ github.repository }}" \
+          --base "${{ github.event.pull_request.base.sha }}" \
+          --head "${{ github.event.pull_request.head.sha }}" \
+          --fail-on "${{ inputs.fail-on }}" \
+          --sarif ${{ inputs.args }} > sol-pr-guard.sarif || echo "SPG_EXIT=$?" >> "$GITHUB_ENV"
+    - name: Upload SARIF to code scanning
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: sol-pr-guard.sarif
+    - name: Enforce gate
+      shell: bash
+      run: |
+        # Re-run for the exit code (SARIF step above swallowed it for upload).
+        npx --yes sol-pr-guard@${{ inputs.version }} scan \
+          --repo "${{ github.repository }}" \
+          --base "${{ github.event.pull_request.base.sha }}" \
+          --head "${{ github.event.pull_request.head.sha }}" \
+          --fail-on "${{ inputs.fail-on }}" --format=efm
