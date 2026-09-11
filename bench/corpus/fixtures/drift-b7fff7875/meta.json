@@ -1,0 +1,24 @@
+{
+  "id": "drift-b7fff7875",
+  "rule": "subtype-blind-solvency",
+  "repo": "velocity-exchange/protocol-v2",
+  "sha": "b7fff7875068c1741d58fbd15aaf97756eb4eb85",
+  "file": "programs/drift/src/math/bankruptcy.rs",
+  "expectTier": 2,
+  "note": "is_cross_margin_bankrupt perp loop never skips isolated positions (PR #1757; fix #2123 adds is_isolated() continue)",
+  "buggyChanged": [
+    20,
+    21,
+    22,
+    23,
+    24,
+    25
+  ],
+  "fixedChanged": [
+    23,
+    24,
+    25,
+    26,
+    27
+  ]
+}

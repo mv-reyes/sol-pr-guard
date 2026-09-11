@@ -1,0 +1,43 @@
+{
+  "name": "sol-pr-guard",
+  "version": "0.1.0",
+  "description": "Diff-scoped security reviewer for Solana (Rust/Anchor) pull requests. Precise, file:line findings derived from real exploits.",
+  "license": "MIT",
+  "type": "commonjs",
+  "bin": {
+    "sol-pr-guard": "dist/src/cli.js"
+  },
+  "main": "dist/src/engine.js",
+  "files": [
+    "dist/src/**/*.js",
+    "dist/src/**/*.d.ts",
+    "assets/**/*.wasm",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "node node_modules/typescript/bin/tsc -p tsconfig.json && node scripts/copy-wasm.js",
+    "prepare": "node node_modules/typescript/bin/tsc -p tsconfig.json && node scripts/copy-wasm.js",
+    "pretest": "node node_modules/typescript/bin/tsc -p tsconfig.json && node scripts/copy-wasm.js",
+    "test": "node scripts/run-tests.js",
+    "corpus": "node dist/bench/corpus/replay.js",
+    "mutation": "node dist/bench/mutation/run.js",
+    "fp-traps": "node dist/bench/fp-traps/run.js",
+    "evasion": "node bench/evasion/run.js",
+    "fp-burnin": "node dist/bench/fp-burnin/run.js",
+    "ai-calibration": "node dist/bench/ai-calibration/run.js",
+    "redteam": "node dist/bench/redteam/run.js",
+    "typecheck": "node node_modules/typescript/bin/tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "web-tree-sitter": "0.25.10",
+    "tree-sitter-wasms": "0.1.13"
+  },
+  "devDependencies": {
+    "typescript": "5.6.3",
+    "@types/node": "20.14.0"
+  }
+}

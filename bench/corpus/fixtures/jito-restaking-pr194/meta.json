@@ -1,0 +1,17 @@
+{
+  "id": "jito-restaking-pr194",
+  "rule": "incomplete-account-close",
+  "repo": "jito-foundation/restaking",
+  "sha": "ce5c981bef96fa836b00a5253d3dcddfdf4b1442",
+  "file": "core/src/lib.rs",
+  "expectTier": 1,
+  "note": "manual close (assign+memset) without realloc(0)",
+  "buggyChanged": [
+    111,
+    112,
+    113
+  ],
+  "fixedChanged": [
+    111
+  ]
+}

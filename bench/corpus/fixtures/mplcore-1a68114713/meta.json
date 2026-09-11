@@ -1,0 +1,25 @@
+{
+  "id": "mplcore-1a68114713",
+  "rule": "auth-precedence",
+  "repo": "metaplex-foundation/mpl-core",
+  "sha": "1a681147131a1d8ef8931bb803ecaed846f92324",
+  "file": "programs/mpl-core/src/plugins/internal/authority_managed/update_delegate.rs",
+  "expectTier": 1,
+  "note": "A || B && C auth condition without parentheses",
+  "buggyChanged": [
+    144,
+    145,
+    151,
+    152
+  ],
+  "fixedChanged": [
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    155,
+    156
+  ]
+}

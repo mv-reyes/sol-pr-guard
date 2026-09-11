@@ -1,0 +1,21 @@
+{
+  "id": "tensor-713db3affe",
+  "rule": "disabled-constraint",
+  "repo": "tensor-foundation/marketplace",
+  "sha": "713db3affe57cbd06331312f81791c8099b79eac",
+  "file": "program/src/instructions/legacy/buy.rs",
+  "expectTier": 1,
+  "note": "/// CHECK: none, can be anything + commented-out address= constraint",
+  "buggyChanged": [
+    9,
+    78,
+    126
+  ],
+  "fixedChanged": [
+    9,
+    10,
+    11,
+    80,
+    128
+  ]
+}

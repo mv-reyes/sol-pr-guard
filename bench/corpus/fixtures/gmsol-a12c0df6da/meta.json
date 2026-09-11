@@ -1,0 +1,25 @@
+{
+  "id": "gmsol-a12c0df6da",
+  "rule": "disabled-constraint",
+  "repo": "gmsol-labs/gmx-solana",
+  "sha": "a12c0df6da9aa0e4683559dd80cce3a0c69dd59b",
+  "file": "programs/store/src/instructions/exchange/execute_order.rs",
+  "expectTier": 1,
+  "note": "final_output_market unpacked from remaining_accounts",
+  "buggyChanged": [
+    361,
+    530,
+    535,
+    536,
+    537,
+    538,
+    539,
+    540,
+    547
+  ],
+  "fixedChanged": [
+    361,
+    540,
+    541
+  ]
+}

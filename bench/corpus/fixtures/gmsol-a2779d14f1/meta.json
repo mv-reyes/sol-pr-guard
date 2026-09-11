@@ -1,0 +1,17 @@
+{
+  "id": "gmsol-a2779d14f1",
+  "rule": "realloc-zero-init",
+  "repo": "gmsol-labs/gmx-solana",
+  "sha": "a2779d14f154f93d4e9f449c8d8c601d5548aa2a",
+  "file": "programs/store/src/instructions/token_config.rs",
+  "expectTier": 1,
+  "note": "realloc(new_space, false); this is the README demo (#362)",
+  "buggyChanged": [
+    475
+  ],
+  "fixedChanged": [
+    475,
+    476,
+    477
+  ]
+}

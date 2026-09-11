@@ -1,0 +1,272 @@
+From ecdc09d3dd326ac5d82d0e9c4e02528c426da048 Mon Sep 17 00:00:00 2001
+From: "Jesse Y. Cho" <jessecho@cs.washington.edu>
+Date: Wed, 31 Jan 2024 13:49:19 +0900
+Subject: [PATCH 1/4] fee bound check for unsigned fee
+
+---
+ .../flat_fee_interface/src/errors.rs                 |  6 ++++--
+ idl/pricing-programs/flat_fee.json                   |  7 ++++++-
+ libs/pricing-programs/flat-fee-lib/src/fee_bound.rs  | 12 ++++++++++--
+ 3 files changed, 20 insertions(+), 5 deletions(-)
+
+diff --git a/generated/pricing-programs/flat_fee_interface/src/errors.rs b/generated/pricing-programs/flat_fee_interface/src/errors.rs
+index 6e352393..bf455b3a 100644
+--- a/generated/pricing-programs/flat_fee_interface/src/errors.rs
++++ b/generated/pricing-programs/flat_fee_interface/src/errors.rs
+@@ -12,10 +12,12 @@ pub enum FlatFeeError {
+     IncorrectProgramState = 1,
+     #[error("FeeAccount is not initialized for the given LST mint")]
+     UnsupportedLstMint = 2,
+-    #[error("Given fee value is out of bound")]
++    #[error("Given signed fee value is out of bound")]
+     SignedFeeOutOfBound = 3,
++    #[error("Given unsigned fee value is out of bound")]
++    UnsignedFeeOutOfBound = 4,
+     #[error("Math error")]
+-    MathError = 4,
++    MathError = 5,
+ }
+ impl From<FlatFeeError> for ProgramError {
+     fn from(e: FlatFeeError) -> Self {
+diff --git a/idl/pricing-programs/flat_fee.json b/idl/pricing-programs/flat_fee.json
+index 72a06ea0..bd3195c1 100644
+--- a/idl/pricing-programs/flat_fee.json
++++ b/idl/pricing-programs/flat_fee.json
+@@ -421,10 +421,15 @@
+     {
+       "code": 3,
+       "name": "SignedFeeOutOfBound",
+-      "msg": "Given fee value is out of bound"
++      "msg": "Given signed fee value is out of bound"
+     },
+     {
+       "code": 4,
++      "name": "UnsignedFeeOutOfBound",
++      "msg": "Given unsigned fee value is out of bound"
++    },
++    {
++      "code": 5,
+       "name": "MathError",
+       "msg": "Math error"
+     }
+diff --git a/libs/pricing-programs/flat-fee-lib/src/fee_bound.rs b/libs/pricing-programs/flat-fee-lib/src/fee_bound.rs
+index 98c01a0d..442a5718 100644
+--- a/libs/pricing-programs/flat-fee-lib/src/fee_bound.rs
++++ b/libs/pricing-programs/flat-fee-lib/src/fee_bound.rs
+@@ -1,10 +1,18 @@
+ use flat_fee_interface::FlatFeeError;
+ 
+-const MAX_FEE_BPS: i16 = 10_000;
++const MAX_SIGNED_FEE_BPS: i16 = 10_000;
++const MAX_UNSIGNED_FEE_BPS: u16 = 10_000;
+ 
+ pub fn verify_signed_fee_bps_bound(fee_bps_i16: i16) -> Result<(), FlatFeeError> {
+-    if !(-MAX_FEE_BPS..=MAX_FEE_BPS).contains(&fee_bps_i16) {
++    if !(-MAX_SIGNED_FEE_BPS..=MAX_SIGNED_FEE_BPS).contains(&fee_bps_i16) {
+         return Err(FlatFeeError::SignedFeeOutOfBound);
+     }
+     Ok(())
+ }
++
++pub fn verify_unsigned_fee_bps_bound(fee_bps_u16: u16) -> Result<(), FlatFeeError> {
++    if !(0..=MAX_UNSIGNED_FEE_BPS).contains(&fee_bps_u16) {
++        return Err(FlatFeeError::UnsignedFeeOutOfBound);
++    }
++    Ok(())
++}
+
+From 57eb9422b4521e1da1de155812052ce176f9d7a5 Mon Sep 17 00:00:00 2001
+From: "Jesse Y. Cho" <jessecho@cs.washington.edu>
+Date: Wed, 31 Jan 2024 13:50:32 +0900
+Subject: [PATCH 2/4] check fee bound for lp withdrawal fee
+
+---
+ .../src/processor/set_lp_withdrawal_fee.rs     | 18 ++++++++++++------
+ 1 file changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/programs/pricing-programs/flat-fee/src/processor/set_lp_withdrawal_fee.rs b/programs/pricing-programs/flat-fee/src/processor/set_lp_withdrawal_fee.rs
+index cbb0f17f..95fd584c 100644
+--- a/programs/pricing-programs/flat-fee/src/processor/set_lp_withdrawal_fee.rs
++++ b/programs/pricing-programs/flat-fee/src/processor/set_lp_withdrawal_fee.rs
+@@ -2,7 +2,10 @@ use flat_fee_interface::{
+     set_lp_withdrawal_fee_verify_account_keys, set_lp_withdrawal_fee_verify_account_privileges,
+     SetLpWithdrawalFeeAccounts, SetLpWithdrawalFeeIxArgs, SetLpWithdrawalFeeKeys,
+ };
+-use flat_fee_lib::{account_resolvers::SetLpWithdrawalFeeFreeArgs, utils::try_program_state_mut};
++use flat_fee_lib::{
++    account_resolvers::SetLpWithdrawalFeeFreeArgs, fee_bound::verify_unsigned_fee_bps_bound,
++    utils::try_program_state_mut,
++};
+ use sanctum_misc_utils::{
+     load_accounts, log_and_return_acc_privilege_err, log_and_return_wrong_acc_err,
+ };
+@@ -12,21 +15,22 @@ use solana_program::{
+ 
+ pub fn process_set_lp_withdrawal_fee(
+     accounts: &[AccountInfo],
+-    SetLpWithdrawalFeeIxArgs {
+-        lp_withdrawal_fee_bps,
+-    }: SetLpWithdrawalFeeIxArgs,
++    args: SetLpWithdrawalFeeIxArgs,
+ ) -> ProgramResult {
+-    let SetLpWithdrawalFeeAccounts { state, .. } = verify_set_lp_withdrawal_fee(accounts)?;
++    let SetLpWithdrawalFeeAccounts { state, .. } = verify_set_lp_withdrawal_fee(accounts, &args)?;
+ 
+     let mut bytes = state.try_borrow_mut_data()?;
+     let state = try_program_state_mut(&mut bytes)?;
+-    state.lp_withdrawal_fee_bps = lp_withdrawal_fee_bps;
++    state.lp_withdrawal_fee_bps = args.lp_withdrawal_fee_bps;
+ 
+     Ok(())
+ }
+ 
+ fn verify_set_lp_withdrawal_fee<'me, 'info>(
+     accounts: &'me [AccountInfo<'info>],
++    SetLpWithdrawalFeeIxArgs {
++        lp_withdrawal_fee_bps,
++    }: &SetLpWithdrawalFeeIxArgs,
+ ) -> Result<SetLpWithdrawalFeeAccounts<'me, 'info>, ProgramError> {
+     let actual: SetLpWithdrawalFeeAccounts = load_accounts(accounts)?;
+ 
+@@ -40,5 +44,7 @@ fn verify_set_lp_withdrawal_fee<'me, 'info>(
+     set_lp_withdrawal_fee_verify_account_privileges(actual)
+         .map_err(log_and_return_acc_privilege_err)?;
+ 
++    verify_unsigned_fee_bps_bound(*lp_withdrawal_fee_bps)?;
++
+     Ok(actual)
+ }
+
+From 2643fbf0fe98da467b81a45a0a971630523589ba Mon Sep 17 00:00:00 2001
+From: "Jesse Y. Cho" <jessecho@cs.washington.edu>
+Date: Wed, 31 Jan 2024 13:51:22 +0900
+Subject: [PATCH 3/4] minor-edit: refactor set_lst_fee for consistency
+
+---
+ .../flat-fee/src/processor/set_lst_fee.rs       | 17 ++++++++---------
+ 1 file changed, 8 insertions(+), 9 deletions(-)
+
+diff --git a/programs/pricing-programs/flat-fee/src/processor/set_lst_fee.rs b/programs/pricing-programs/flat-fee/src/processor/set_lst_fee.rs
+index 9b78a199..9169cd8c 100644
+--- a/programs/pricing-programs/flat-fee/src/processor/set_lst_fee.rs
++++ b/programs/pricing-programs/flat-fee/src/processor/set_lst_fee.rs
+@@ -15,23 +15,22 @@ use solana_program::{
+ 
+ pub fn process_set_lst_fee(accounts: &[AccountInfo], args: SetLstFeeIxArgs) -> ProgramResult {
+     let SetLstFeeAccounts { fee_acc, .. } = verify_set_lst_fee(accounts, &args)?;
+-    let SetLstFeeIxArgs {
+-        input_fee_bps,
+-        output_fee_bps,
+-    } = args;
+ 
+     let mut bytes = fee_acc.try_borrow_mut_data()?;
+     let fee_acc = try_fee_account_mut(&mut bytes)?;
+ 
+-    fee_acc.input_fee_bps = input_fee_bps;
+-    fee_acc.output_fee_bps = output_fee_bps;
++    fee_acc.input_fee_bps = args.input_fee_bps;
++    fee_acc.output_fee_bps = args.output_fee_bps;
+ 
+     Ok(())
+ }
+ 
+ fn verify_set_lst_fee<'me, 'info>(
+     accounts: &'me [AccountInfo<'info>],
+-    args: &SetLstFeeIxArgs,
++    SetLstFeeIxArgs {
++        input_fee_bps,
++        output_fee_bps,
++    }: &SetLstFeeIxArgs,
+ ) -> Result<SetLstFeeAccounts<'me, 'info>, ProgramError> {
+     let actual: SetLstFeeAccounts = load_accounts(accounts)?;
+ 
+@@ -44,8 +43,8 @@ fn verify_set_lst_fee<'me, 'info>(
+     set_lst_fee_verify_account_keys(actual, expected).map_err(log_and_return_wrong_acc_err)?;
+     set_lst_fee_verify_account_privileges(actual).map_err(log_and_return_acc_privilege_err)?;
+ 
+-    verify_signed_fee_bps_bound(args.input_fee_bps)?;
+-    verify_signed_fee_bps_bound(args.output_fee_bps)?;
++    verify_signed_fee_bps_bound(*input_fee_bps)?;
++    verify_signed_fee_bps_bound(*output_fee_bps)?;
+ 
+     Ok(actual)
+ }
+
+From 91a7229c78e03bcdc95cd587acbf7f79c5608d4b Mon Sep 17 00:00:00 2001
+From: "Jesse Y. Cho" <jessecho@cs.washington.edu>
+Date: Wed, 31 Jan 2024 14:13:46 +0900
+Subject: [PATCH 4/4] add test case
+
+---
+ .../tests/tests/set_lp_withdrawal_fee.rs      | 48 ++++++++++++++++++-
+ 1 file changed, 46 insertions(+), 2 deletions(-)
+
+diff --git a/programs/pricing-programs/flat-fee/tests/tests/set_lp_withdrawal_fee.rs b/programs/pricing-programs/flat-fee/tests/tests/set_lp_withdrawal_fee.rs
+index ca1643c9..602fc522 100644
+--- a/programs/pricing-programs/flat-fee/tests/tests/set_lp_withdrawal_fee.rs
++++ b/programs/pricing-programs/flat-fee/tests/tests/set_lp_withdrawal_fee.rs
+@@ -1,11 +1,12 @@
+ use flat_fee_interface::{
+-    set_lp_withdrawal_fee_ix, ProgramState, SetLpWithdrawalFeeIxArgs, SetLpWithdrawalFeeKeys,
++    set_lp_withdrawal_fee_ix, FlatFeeError, ProgramState, SetLpWithdrawalFeeIxArgs,
++    SetLpWithdrawalFeeKeys,
+ };
+ use flat_fee_lib::{
+     account_resolvers::SetLpWithdrawalFeeFreeArgs, program::STATE_ID, utils::try_program_state,
+ };
+ use flat_fee_test_utils::FlatFeePricingProgramTestBanksClient;
+-use sanctum_solana_test_utils::assert_program_error;
++use sanctum_solana_test_utils::{assert_custom_err, assert_program_error};
+ use solana_program::program_error::ProgramError;
+ use solana_readonly_account::sdk::KeyedAccount;
+ use solana_sdk::{signature::Keypair, signer::Signer, transaction::Transaction};
+@@ -53,6 +54,49 @@ async fn set_lp_withdrawal_fee_basic() {
+     assert_eq!(state.lp_withdrawal_fee_bps, NEW_LP_WITHDRAWAL_FEE_BPS);
+ }
+ 
++#[tokio::test]
++async fn set_lp_withdrawal_fee_fail_invalid_fee() {
++    const BAD_LP_WITHDRAWAL_FEE_BPS: u16 = 10_001;
++
++    let manager = Keypair::new();
++
++    let program_test = normal_program_test(
++        ProgramState {
++            manager: manager.pubkey(),
++            lp_withdrawal_fee_bps: Default::default(),
++        },
++        &[],
++    );
++    let (mut banks_client, payer, last_blockhash) = program_test.start().await;
++
++    let state_acc = banks_client.get_flat_fee_program_state().await;
++    let ix = set_lp_withdrawal_fee_ix(
++        SetLpWithdrawalFeeFreeArgs {
++            state_acc: KeyedAccount {
++                pubkey: STATE_ID,
++                account: state_acc,
++            },
++        }
++        .resolve()
++        .unwrap(),
++        SetLpWithdrawalFeeIxArgs {
++            lp_withdrawal_fee_bps: BAD_LP_WITHDRAWAL_FEE_BPS,
++        },
++    )
++    .unwrap();
++
++    let mut tx = Transaction::new_with_payer(&[ix], Some(&payer.pubkey()));
++    tx.sign(&[&payer, &manager], last_blockhash);
++
++    let err = banks_client.process_transaction(tx).await.unwrap_err();
++    assert_custom_err(err, FlatFeeError::UnsignedFeeOutOfBound);
++
++    let state_acc = banks_client.get_flat_fee_program_state().await;
++    let state = try_program_state(&state_acc.data).unwrap();
++
++    assert_ne!(state.lp_withdrawal_fee_bps, BAD_LP_WITHDRAWAL_FEE_BPS);
++}
++
+ #[tokio::test]
+ async fn set_lp_withdrawal_fee_fail_unauthorized() {
+     const NEW_LP_WITHDRAWAL_FEE_BPS: u16 = 69;

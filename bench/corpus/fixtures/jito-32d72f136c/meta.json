@@ -1,0 +1,19 @@
+{
+  "id": "jito-32d72f136c",
+  "rule": "discarded-checked-result",
+  "repo": "jito-foundation/jito-programs",
+  "sha": "32d72f136cf561ce4c910e48721ebdb551aed645",
+  "file": "tip-payment/programs/tip-distribution/src/lib.rs",
+  "expectTier": 1,
+  "note": "bare `.checked_add(amount).unwrap();` statement discards the result",
+  "buggyChanged": [
+    264,
+    268
+  ],
+  "fixedChanged": [
+    264,
+    265,
+    269,
+    270
+  ]
+}

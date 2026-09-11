@@ -1,0 +1,21 @@
+{
+  "id": "drift-e6ee7b4e1",
+  "rule": "early-return-skips-cleanup",
+  "repo": "velocity-exchange/protocol-v2",
+  "sha": "e6ee7b4e1191710c115647a75056c210b1b21c13",
+  "file": "programs/drift/src/state/liquidation_mode.rs",
+  "expectTier": 2,
+  "note": "get_perp_position(market_index)? aborts mode dispatch before the caller exit_liquidation path (PR #1757; fix #2122 Err-arm fallback)",
+  "buggyChanged": [
+    95
+  ],
+  "fixedChanged": [
+    95,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101
+  ]
+}

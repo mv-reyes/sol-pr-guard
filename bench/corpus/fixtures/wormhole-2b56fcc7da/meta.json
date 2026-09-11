@@ -1,0 +1,36 @@
+{
+  "id": "wormhole-2b56fcc7da",
+  "rule": "prefunded-pda-dos",
+  "repo": "wormhole-foundation/wormhole",
+  "sha": "2b56fcc7da4422f2270431f0f9c996021115acc0",
+  "file": "solana/bridge/program/src/api/post_message.rs",
+  "expectTier": 1,
+  "note": "raw system_instruction::create_account + invoke, no exists-guard",
+  "buggyChanged": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    60,
+    61,
+    132,
+    134,
+    135,
+    136,
+    138,
+    139
+  ],
+  "fixedChanged": [
+    14,
+    61,
+    132,
+    133,
+    134,
+    136,
+    137,
+    139,
+    140
+  ]
+}

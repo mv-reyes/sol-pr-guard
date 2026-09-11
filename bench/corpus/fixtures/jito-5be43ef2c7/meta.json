@@ -1,0 +1,27 @@
+{
+  "id": "jito-5be43ef2c7",
+  "rule": "closed-enum-deserialize",
+  "repo": "jito-foundation/jito-programs",
+  "sha": "5be43ef2c7fc46920919fd13bf2f2f455efbeb37",
+  "file": "mev-programs/programs/vote-state/src/lib.rs",
+  "expectTier": 2,
+  "note": "bincode::deserialize::<Box<VoteStateVersions>>(&data) on a raw vote account (PR #136; fix #153 parses data[4..36])",
+  "buggyChanged": [
+    268,
+    271,
+    272,
+    277,
+    278,
+    279
+  ],
+  "fixedChanged": [
+    3,
+    7,
+    10,
+    11,
+    12,
+    13,
+    17,
+    19
+  ]
+}
